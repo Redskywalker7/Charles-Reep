@@ -87,7 +87,8 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                                  h1("Soccer Formations"),
                                  img(src="image (1).png"),
                                  h4("In memory of charles reep"),
-                                 verbatimTextOutput("txtout")
+                                 verbatimTextOutput("txtout"),
+                                 tableOutput('table')
                                  
                              ) # mainPanel
                              
@@ -102,12 +103,11 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 
 # Define server function  
 server <- function(input, output) {
-    
+
     output$txtout <- renderText({
-       lewisFormation("hi")
         paste( input$txt1, input$txt2, sep = " " )
     })
-
+    output$table <- renderTable(lewisFormation("hi"))
     
 } # server
 
