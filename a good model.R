@@ -3,7 +3,7 @@ library(lmtest)
 library(normtest)
 library(car)
 
-dat <- read_csv("la_liga_dataset (1).csv")
+dat <- read_csv("la_liga_dataset.csv")
 
 ##### MODEL WITH ALL FORMATIONS AS INDICATOR VARIABLES #####
 
