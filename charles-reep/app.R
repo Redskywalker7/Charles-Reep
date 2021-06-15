@@ -126,6 +126,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                     "My first app",
                     tabPanel("Navbar 1",
                              sidebarPanel(
+                                 fluidRow(
                                  tags$h3("Input your stats below:"),
                                  selectInput("formation", label="Formation", choices = c("","343","352", "3142", "3232", "3322", "3421", "3511", "32122", "32212", "32221", "433", "442", "451", "4141", "4222", "4231", "4321", "4411", "41212", "41221", "42121", "42211", "541", "5122", "5221"), selected= NULL, multiple = F),
                                  textInput("SoT", "Shots on Target:", ""),
@@ -134,19 +135,21 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                                  textInput("MeanXg", "Mean XG:", ""),
                                  textInput("SoTa", "Opponent Shots on Target:", ""),
                                  textInput("PaA", "Opponent Passing Accuracy:", ""),
-                                 textInput("PrA", "Opponent Possession Ratio:", "")
+                                 textInput("PrA", "Opponent Possession Ratio:", ""),
+                                 submitButton("Process Stats")
                                  
-                                  #idk what we are going to do for inputs? maybe just have static images at this point
-                                 
-                                 #textInput("txt2", "Surname:", ""),
-                                 
-                             ), # sidebarPanel
+                             )), # sidebarPanel
                              mainPanel(
+                                 column(3, verbatimTextOutput("formation")),
+                                 #box(width = 12, title = "442")
                                  h1("Soccer Formations"),
-                                 img(src="image (1).png"),
-                                 h4("In memory of charles reep"),
-                                 verbatimTextOutput("txtout"),
-                                 tableOutput('table')
+                                 #fluidRow(
+                                    # box(width = 6, title = "test", status = "primary", solidHeader = TRUE, "Box Content")
+                                # )
+                                 #img(src="image (1).png"),
+                                 #h4("In memory of charles reep"),
+                                 #verbatimTextOutput("txtout"),
+                                 #tableOutput('table')
                                  
                              ) # mainPanel
                              
@@ -162,6 +165,9 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 # Define server function  
 server <- function(input, output) {
     
+    output$formation <- renderText({
+        paste("Your formation is:", input$formation)
+    })
 
     output$txtout <- renderText({
         paste( input$txt1, input$txt2, sep = " " )
