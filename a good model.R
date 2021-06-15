@@ -144,23 +144,23 @@ curve(dnorm, from = -4, to = 4, add = TRUE) # looks great
 ### variable selection/checking VIFs ### 
 # all completely unsuccessful so far lol
 
-# Check for collinearity
-car::vif(lm_grouped) # no (?)
-
-# try BIC
-# first get a dataframe that eliminates the char variables
-
-dat_nochar <- datt %>% 
-  dplyr::select(Formation:Goals, -Timestamp, xg_per_minute, 
-                pass_accuracy, possession_ratio, formtype) %>% 
-  print()
-
-dat_nochar$Period <- as.factor(dat_nochar$Period)
-dat_nochar$formtype <- as.factor(dat_nochar$formtype)
-
-varselect <- bestglm::bestglm(dat_nochar, IC = "AIC",
-                              method = "backward",
-                              TopModels = 10)
+# # Check for collinearity
+# car::vif(lm_grouped) # no (?)
+# 
+# # try BIC
+# # first get a dataframe that eliminates the char variables
+# 
+# dat_nochar <- datt %>% 
+#   dplyr::select(Formation:Goals, -Timestamp, xg_per_minute, 
+#                 pass_accuracy, possession_ratio, formtype) %>% 
+#   print()
+# 
+# dat_nochar$Period <- as.factor(dat_nochar$Period)
+# dat_nochar$formtype <- as.factor(dat_nochar$formtype)
+# 
+# varselect <- bestglm::bestglm(dat_nochar, IC = "AIC",
+#                               method = "backward",
+#                               TopModels = 10)
 
 
 
