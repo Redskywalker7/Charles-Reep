@@ -25,7 +25,115 @@ predict_total_xg <- function(input){
     attackers <- get_attackers(input$formation)
     defenders <- get_defenders(input$formation)
     
-    total_xg <- predict(model, input)
+    dat <- read_csv("la_liga_dataset.csv")
+    
+    datt <- dat
+    # save a copy of the original dataframe just for the sake of experimentation
+    
+    # GROUPING BASED ON DEFENDERS
+    datt <- datt %>% 
+      mutate(formtype_def = case_when(str_detect(datt$Formation, "^3") ~ "3",
+                                      str_detect(datt$Formation, "^4") ~ "4",
+                                      str_detect(datt$Formation, "^5") ~ "5"))
+    # create a new column "formtype_def" assigning a number to each formation based on 
+    # the number of defenders used in the lineup
+    
+    ##### grouping based on attackers #####
+    
+    ### GROUPING BASED ON ATTACKERS ###
+    
+    ## create a df with all formations of a given string length: ##
+    
+    # select all formations with nchar = 3
+    char3 <- as.tibble(datt$Formation[stringr::str_length(datt$Formation) == 3]) %>% 
+      select(everything()) %>% 
+      rename(Formation = value)
+    char3 <- semi_join(datt, char3, by = c("Formation" = "Formation"))
+    
+    # select all formations with nchar = 4
+    char4 <- as.tibble(datt$Formation[stringr::str_length(datt$Formation) == 4]) %>% 
+      select(everything()) %>% 
+      rename(Formation = value)
+    char4 <- semi_join(datt, char4, by = c("Formation" = "Formation"))
+    
+    # select all formations with nchar = 5
+    char5 <- as.tibble(datt$Formation[stringr::str_length(datt$Formation) == 5]) %>% 
+      select(everything()) %>% 
+      rename(Formation = value)
+    char5 <- semi_join(datt, char5, by = c("Formation" = "Formation"))
+    
+    ## create an attacking formtype variable for each one ##
+    # selects the 3rd character from the string of 3 numbers and creates the new 
+    # variable "formtype_att"
+    char3 <- char3 %>% 
+      mutate(formtype_att = str_sub(char3$Formation, 3, 3))
+    char3$formtype_att <- as.numeric(char3$formtype_att)
+    
+    # selects the 3rd and 4th values from the string of 4 numbers and creates a new 
+    # variable in the dataframe for each one (formtype_att1 and formtype_att2)
+    char4 <- char4 %>% 
+      mutate(formtype_att1 = str_sub(char4$Formation, 3, 3),
+             formtype_att2 = str_sub(char4$Formation, 4, 4))
+    
+    # changes formtype_att1 and 2 to numeric values to sum them
+    char4$formtype_att1 <- as.numeric(char4$formtype_att1)
+    char4$formtype_att2 <- as.numeric(char4$formtype_att2)
+    
+    # creates a new variable formtype_att by summing formtype_att1 and 2, then drops
+    # those two columns/variables from the data frame
+    char4 <- char4 %>%
+      mutate(formtype_att = formtype_att1 + formtype_att2) %>% 
+      select(everything(), -formtype_att1, -formtype_att2)
+    
+    
+    # selects the 4th and 5th values from the string of 5 numbers and creates a new 
+    # variable in the dataframe for each one (formtype_att1 and formtype_att2)
+    char5 <- char5 %>% 
+      mutate(formtype_att1 = str_sub(char5$Formation, 4, 4),
+             formtype_att2 = str_sub(char5$Formation, 5, 5))
+    
+    # changes formtype_att1 and 2 to numeric values to sum them
+    char5$formtype_att1 <- as.numeric(char5$formtype_att1)
+    char5$formtype_att2 <- as.numeric(char5$formtype_att2)
+    
+    # creates a new variable formtype_att by summing formtype_att1 and 2, then drops
+    # those two columns/variables from the data frame
+    char5 <- char5 %>%
+      mutate(formtype_att = formtype_att1 + formtype_att2) %>% 
+      select(everything(), -formtype_att1, -formtype_att2)
+    
+    
+    ## combine them all back into one big dataframe
+    # join the 3 and 4 character dfs
+    char3and4 <- full_join(char3, char4) 
+    
+    # join the 5 character df to the one with the 3 and 4 characters joined together
+    allchar <- full_join(char3and4, char5) 
+    
+    allchar$formtype_att <- as.factor(allchar$formtype_att)
+    allchar$formtype_def <- as.factor(allchar$formtype_def)
+    
+    
+    ##### OFFENSIVE MODEL #####
+    
+    lm_grouped <- lm(Total_xg ~ formtype_att + 
+                       Shots_tg + 
+                       pass_accuracy + 
+                       possession_ratio, 
+                     data = allchar)
+    
+    ##### DEFENSIVE MODEL #####
+    lm_grouped_against <- lm(Total_xg_against ~ formtype_def + # `Team Name` 
+                               Shots_tg_against + 
+                               pass_accuracy_against + 
+                               possession_ratio_against, 
+                             data = allchar)
+    
+    attack_inputs <- data.frame(formtype_att=attackers, Shots_tg=input$shots_on_target, 
+                                pass_accuracy=input$pass_accuracy, possession_ratio=input$poss_ratio)
+    defender_inputs <- data.frame(formtype_def=defenders)
+    
+    total_xg_for <- predict(lm_grouped, attack_inputs, interval = "predict")
     return(total_xg)
 }
 
