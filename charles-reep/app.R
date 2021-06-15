@@ -15,8 +15,19 @@ library(ggplot2)
 library(ggforce)
 library(rgdal)
 library(R2jags)
+library(lmtest)
+library(normtest)
+library(car)
 
 #data <- read.csv("data/la_liga_shots_per_formation.csv")
+
+predict_total_xg <- function(input){
+    
+    attackers_and_defenders <- 
+    
+    total_xg <- predict(model, input)
+    return(total_xg)
+}
 
 lewisFormation <- function(id){
     LaLigaData <- read.csv("la_liga_dataset.csv", header = TRUE, sep = ",")
@@ -103,11 +114,12 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 
 # Define server function  
 server <- function(input, output) {
+    
 
     output$txtout <- renderText({
         paste( input$txt1, input$txt2, sep = " " )
     })
-    output$table <- renderTable(lewisFormation("hi"))
+    output$table <- renderTable(predict_total_xg(input))
     
 } # server
 
