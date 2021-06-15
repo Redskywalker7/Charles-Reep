@@ -18,6 +18,9 @@ library(lmtest)
 library(normtest)
 library(car)
 library(DT)
+library(slickR)
+
+
 predict_total_xg <- function(input){
   attackers <- get_attackers(input$formation)
   defenders <- get_defenders(input$formation)
@@ -310,6 +313,14 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                   ), # Navbar 1, tabPanel
                   tabPanel("Heatmaps",  h1("Goals Scored For and Against in Various Formations"),
                            hr(),
+                           column(3),
+                           column(1,
+                                  img(src="heatmaps/Barca433.png", width = 800, height = 600),
+                                  h1(" "),
+                                  img(src="heatmaps/Barca442.png", width = 800, height = 600),
+                                  h1(" "),
+                                  img(src="heatmaps/Barca4231.png", width = 800, height = 600))
+                                 
                   ),
                   tabPanel("Visualizations", 
                            h1("Goals Scored For and Against in Various Formations"),
@@ -346,11 +357,15 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 #}
 # Define server function  
 server <- function(input, output) {
+  
+  
+  
   data <- eventReactive(input$goButton, {
     matrix(
       c()
     )
   })
+  
   observeEvent(
     eventExpr = input[["goButton"]],
     handlerExpr = {
@@ -370,6 +385,7 @@ server <- function(input, output) {
         paste( input$txt1, input$txt2, sep = " " )
       })}
   )
+
   # output$table <- renderTable(total_xg[1])
 } # server
 # Create Shiny object
