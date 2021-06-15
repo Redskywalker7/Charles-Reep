@@ -19,22 +19,55 @@ library(lmtest)
 library(normtest)
 library(car)
 
-#data <- read.csv("data/la_liga_shots_per_formation.csv")
-LaLigaData <- read.csv("la_liga_dataset.csv", header = TRUE, sep = ",")
-
-#heatmapFunction <- funtion(id)
-
 
 predict_total_xg <- function(input){
     
-    attackers_and_defenders <- 
+    attackers <- get_attackers(input$formation)
+    defenders <- get_defenders(input$formation)
     
     total_xg <- predict(model, input)
     return(total_xg)
 }
 
-lewisFormation <- function(id){
+get_attackers <- function(formation){
+    # determine how many characters the formation is made of
+    if(stringr::str_length(formation == 3)){
+        attackers <- substring(formation, 3, 3)
+        attackers <- strtoi(attackers)
+    }
+    else if(stringr::str_length(formation == 4)){
+        strikers <- substring(formation, 4, 4)
+        attack_mid <- substring(formation, 3, 3)
+        
+        strikers <- strtoi(strikers)
+        attack_mid <- strtoi(attack_mid)
+        
+        attackers <- strikers + attack_mid
+    }
+    else if(stringr::str_length(formation == 5)){
+        strikers <- substring(formation, 5, 5)
+        attack_mid <- substring(formation, 4, 4)
+        
+        strikers <- strtoi(strikers)
+        attack_mid <- strtoi(attack_mid)
+        
+        attackers <- strikers + attack_mid
+    }
+    else{
+        "Defenders must be 3, 4, or 5"
+    }
    
+    return(attackers)
+}
+
+get_defenders <- function(formation){
+    defenders <- substring(formation, 1, 1)
+    
+    return(defenders)
+}
+
+lewisFormation <- function(id){
+    LaLigaData <- read.csv("la_liga_dataset.csv", header = TRUE, sep = ",")
     La1 <- LaLigaData %>%
         filter(Formation == "433")
     La2 <- LaLigaData %>%
@@ -93,8 +126,6 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                     "My first app",
                     tabPanel("Navbar 1",
                              sidebarPanel(
-                                 selectInput("formation", label="Select Formation Below", choices = c("","343","352", "3142", "3232", "3322", "3421", "3511", "32122", "32212", "32221", "433", "442", "451", "4141", "4222", "4231", "4321", "4411", "41212", "41221", "42121", "42211", "541", "5122", "5221"), selected= NULL, multiple = F),
-                                 
                                  tags$h3("Input:"), #idk what we are going to do for inputs? maybe just have static images at this point
                                  textInput("txt1", "Given Name:", ""),
                                  #textInput("txt2", "Surname:", ""),
