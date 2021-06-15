@@ -17,9 +17,13 @@ library(rgdal)
 library(R2jags)
 
 #data <- read.csv("data/la_liga_shots_per_formation.csv")
+LaLigaData <- read.csv("la_liga_dataset.csv", header = TRUE, sep = ",")
+
+#heatmapFunction <- funtion(id)
+
 
 lewisFormation <- function(id){
-    LaLigaData <- read.csv("la_liga_dataset.csv", header = TRUE, sep = ",")
+   
     La1 <- LaLigaData %>%
         filter(Formation == "433")
     La2 <- LaLigaData %>%
@@ -78,6 +82,8 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                     "My first app",
                     tabPanel("Navbar 1",
                              sidebarPanel(
+                                 selectInput("formation", label="Select Formation Below", choices = c("","343","352", "3142", "3232", "3322", "3421", "3511", "32122", "32212", "32221", "433", "442", "451", "4141", "4222", "4231", "4321", "4411", "41212", "41221", "42121", "42211", "541", "5122", "5221"), selected= NULL, multiple = F),
+                                 
                                  tags$h3("Input:"), #idk what we are going to do for inputs? maybe just have static images at this point
                                  textInput("txt1", "Given Name:", ""),
                                  #textInput("txt2", "Surname:", ""),
