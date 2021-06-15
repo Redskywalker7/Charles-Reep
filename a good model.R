@@ -20,11 +20,13 @@ datt <- dat
 
 # GROUPING BASED ON DEFENDERS
 datt <- datt %>% 
-  mutate(formtype_def = case_when(str_detect(datt$Formation, "^3") ~ "1",
-                                  str_detect(datt$Formation, "^4") ~ "2",
-                                  str_detect(datt$Formation, "^5") ~ "3"))
+  mutate(formtype_def = case_when(str_detect(datt$Formation, "^3") ~ "3",
+                                  str_detect(datt$Formation, "^4") ~ "4",
+                                  str_detect(datt$Formation, "^5") ~ "5"))
 # create a new column "formtype_def" assigning a number to each formation based on 
 # the number of defenders used in the lineup
+
+
 
 ##### grouping based on attackers #####
 
@@ -103,12 +105,10 @@ allchar$formtype_def <- as.factor(allchar$formtype_def)
 
 
 ##### OFFENSIVE MODEL #####
-dplyr::select(allchar, formtype_att, formtype_def, everything())
-lm_grouped <- lm(log(Total_xg+1) ~ formtype_att # + `Team Name` 
-                 + Shots_tg + 
-                  Goals + # xg_per_minute + 
-                   #pass_accuracy + 
-                   possession_ratio, 
+lm_grouped <- lm(Total_xg ~ formtype_att + 
+                 Shots_tg + 
+                 pass_accuracy + 
+                 possession_ratio, 
                  data = allchar)
 # i included quite a few terms in the model to see what combo made sense and 
 # and also gave a good R^2
@@ -144,31 +144,30 @@ curve(dnorm, from = -4, to = 4, add = TRUE) # looks great
 ### variable selection/checking VIFs ### 
 # all completely unsuccessful so far lol
 
-# Check for collinearity
-car::vif(lm_grouped) # no (?)
-
-# try BIC
-# first get a dataframe that eliminates the char variables
-
-dat_nochar <- datt %>% 
-  dplyr::select(Formation:Goals, -Timestamp, xg_per_minute, 
-                pass_accuracy, possession_ratio, formtype) %>% 
-  print()
-
-dat_nochar$Period <- as.factor(dat_nochar$Period)
-dat_nochar$formtype <- as.factor(dat_nochar$formtype)
-
-varselect <- bestglm::bestglm(dat_nochar, IC = "AIC",
-                              method = "backward",
-                              TopModels = 10)
+# # Check for collinearity
+# car::vif(lm_grouped) # no (?)
+# 
+# # try BIC
+# # first get a dataframe that eliminates the char variables
+# 
+# dat_nochar <- datt %>% 
+#   dplyr::select(Formation:Goals, -Timestamp, xg_per_minute, 
+#                 pass_accuracy, possession_ratio, formtype) %>% 
+#   print()
+# 
+# dat_nochar$Period <- as.factor(dat_nochar$Period)
+# dat_nochar$formtype <- as.factor(dat_nochar$formtype)
+# 
+# varselect <- bestglm::bestglm(dat_nochar, IC = "AIC",
+#                               method = "backward",
+#                               TopModels = 10)
 
 
 
 
 ##### DEFENSIVE MODEL #####
-lm_grouped_against <- lm(log(Total_xg_against+1) ~ formtype_def + # `Team Name` 
+lm_grouped_against <- lm(Total_xg_against ~ formtype_def + # `Team Name` 
                          Shots_tg_against + 
-                         Goals_against + 
                          pass_accuracy_against + 
                          possession_ratio_against, 
                          data = allchar)
@@ -218,9 +217,8 @@ notbar <- anti_join(datb, onlyb)
 
 # COMPLETELY NON-BARCELONA MODELS
 # completely non-barcelona offensive model
-lm_grouped_notbar <- lm(log(Total_xg+1) ~ formtype_att # + `Team Name` 
-                 + Shots_tg + 
-                   Mean_xg + Goals + # xg_per_minute + 
+lm_grouped_notbar <- lm(Total_xg ~ formtype_att +
+                   Shots_tg + 
                    pass_accuracy + 
                    possession_ratio, 
                  data = notbar)
@@ -249,10 +247,8 @@ curve(dnorm, from = -4, to = 4, add = TRUE) # looks great
 
 
 # completely non-barcelona defensive model
-lm_against_notbar <- lm(log(Total_xg_against+1) ~ formtype_def + # `Team Name` 
+lm_against_notbar <- lm(Total_xg_against ~ formtype_def + 
                            Shots_tg_against + 
-                           Mean_xg_against + Goals_against + 
-                           xg_per_minute_against + 
                            pass_accuracy_against + 
                            possession_ratio_against, 
                          data = notbar)
@@ -291,9 +287,8 @@ datc <- datc %>%
   filter(`Team ID` != 217)
 
 # offensive model
-lm_grouped_baropp <- lm(log(Total_xg+1) ~ formtype_att # + `Team Name` 
-                        + Shots_tg + 
-                          Mean_xg + Goals + # xg_per_minute + 
+lm_grouped_baropp <- lm(Total_xg ~ formtype_att +
+                          Shots_tg + 
                           pass_accuracy + 
                           possession_ratio, 
                         data = datc)
@@ -322,10 +317,8 @@ curve(dnorm, from = -4, to = 4, add = TRUE) # looks great
 
 
 # defensive model
-lm_against_baropp <- lm(log(Total_xg_against+1) ~ formtype_def + # `Team Name` 
+lm_against_baropp <- lm(Total_xg_against ~ formtype_def + 
                           Shots_tg_against + 
-                          Mean_xg_against + Goals_against + 
-                          xg_per_minute_against + 
                           pass_accuracy_against + 
                           possession_ratio_against, 
                         data = datc)
@@ -362,9 +355,8 @@ jb.norm.test(MASS::stdres(lm_against_baropp))
 
 # just the same as the offensive lm_grouped model but with 
 # mean_xg as a response variable
-lm_grouped_meanxg <- lm(Mean_xg ~ formtype_att # + `Team Name` 
-                        + Shots_tg + 
-                          Goals + # xg_per_minute + 
+lm_grouped_meanxg <- lm(Mean_xg ~ formtype_att +
+                          Shots_tg + 
                           pass_accuracy + 
                           possession_ratio, 
                         data = allchar)
@@ -372,6 +364,5 @@ lm_grouped_meanxg <- lm(Mean_xg ~ formtype_att # + `Team Name`
 # and also gave a good R^2
 
 summary(lm_grouped_meanxg)
-
 # what is going on??? The R^2 is tiny
 
