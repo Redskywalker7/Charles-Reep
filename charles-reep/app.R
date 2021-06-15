@@ -140,9 +140,13 @@ ui <- fluidPage(theme = shinytheme("superhero"),
                                  
                              )), # sidebarPanel
                              mainPanel(
-                                 column(3, verbatimTextOutput("formation")),
+                                 hr(),
+                                 h1("Team Expectations"),
+                                 column(3, verbatimTextOutput("formation"), verbatimTextOutput("PrA")),
+                                
+                              
                                  #box(width = 12, title = "442")
-                                 h1("Soccer Formations"),
+                                 
                                  #fluidRow(
                                     # box(width = 6, title = "test", status = "primary", solidHeader = TRUE, "Box Content")
                                 # )
@@ -169,6 +173,10 @@ server <- function(input, output) {
         paste("Your formation is:", input$formation)
     })
 
+    output$PrA <- renderText({
+        paste("Your PrA is:", input$PrA)
+    })
+    
     output$txtout <- renderText({
         paste( input$txt1, input$txt2, sep = " " )
     })
