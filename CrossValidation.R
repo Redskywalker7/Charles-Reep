@@ -185,3 +185,17 @@ for(i in 1:n.cv){
 mean(bias.log)
 mean(rpmse.log)
 range(allchar$Total_xg)
+
+# stack exchange ideas
+# library(boot)
+# d <- allchar
+# m <- lm(Total_xg ~ formtype_att + Shots_tg + 
+#                        pass_accuracy + possession_ratio, 
+#                      data = train.allchar)
+# m.cv <- try(cv.glm(d, m, K = 2))
+# class(m.cv)
+# while ( inherits(m.cv, "try-error") ) {
+#   m.cv <- try(cv.glm(d, m, K = 2))
+# }
+# class(m.cv)
+# definitely doesn't work
